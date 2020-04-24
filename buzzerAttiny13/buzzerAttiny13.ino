@@ -23,6 +23,7 @@
 */
 
 // the setup function runs once when you press reset or power the board
+
 void setup() {
   // initialize digital pin A0 as an output.
   pinMode(PB1, OUTPUT);
@@ -33,6 +34,9 @@ void setup() {
   digitalWrite(PB1, HIGH);   // turn the LED on (HIGH is the voltage level)
   pinMode(PB0, INPUT);
   pinMode(PB1, INPUT);
+  while (digitalRead(PB1) == HIGH) {
+    delay(1);
+  }
 }
 void(* resetFunc) (void) = 0; //declare reset function @ address 0
 // the loop function runs over and over again forever
@@ -45,8 +49,10 @@ void loop() {
   }
 
   while (willbuzzer) {
-    bool state_m = digitalRead(PB0);
-    if (state_m == LOW) {
+    if (digitalRead(PB0) == LOW) {
+      resetFunc();
+    }
+    if (digitalRead(PB1) == LOW) {
       resetFunc();
     }
     buzzer();
