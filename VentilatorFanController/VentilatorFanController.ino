@@ -5,9 +5,10 @@
 #define TINY_ADC_PB5 0x00
 #define CHECK_INTERVAL 4000
 #define BOOT_SETTING_CALIB_TIME 15000
+#define COUNTER 5000
 
 unsigned long value = 0;
-unsigned long max_value = 0;
+unsigned long ref_value = 0;
 unsigned long counter = 0;
 boolean is_caliberated = false;
 boolean keystate = false;
@@ -21,7 +22,6 @@ void setup()
   pinMode(PB1, OUTPUT);
   digitalWrite(PB1, HIGH);
 }
-unsigned long mili = 0;
 void loop()
 {
   unsigned long cur = millis();
@@ -32,45 +32,33 @@ void loop()
       digitalWrite(PB1, LOW);
     }
   }
-  unsigned int r_data = analogRead(TINY_ADC_PB4);
-
-  if (r_data >= 1016) {
-    return;
-  }
+  unsigned int r_data = 1023 - analogRead(TINY_ADC_PB4);
   value = value + r_data;
   counter++;
-  if (cur - mili > CHECK_INTERVAL) {
-    mili = cur;
-    value = value / counter;
-    if (!is_caliberated) {
-      if (cur < BOOT_SETTING_CALIB_TIME ) {
-        if (max_value == 0) {
-          max_value = value;
-        } else {
-          max_value = (max_value + value) / 2;
-        }
-      } else if (cur > BOOT_SETTING_CALIB_TIME ) {
-        is_caliberated = true;
-        max_value = max_value - 10;
-      }
-    }
-    if (value < max_value && keystate == false) {
+  if (counter > COUNTER && is_caliberated) {
+    if (value > ref_value && keystate == false) {
       //        Serial.println("O");
       keystate = true;
       turnofftime = cur / 1000 + 30; //1000*60*10/
       //        turnofftime = cur / 1000 + 600; //1000*60*10
     }
-    if (value > max_value) {
+    if (value < ref_value) {
       keystate = false;
       turnofftime = 0; /// turn off when the key is off
       //        Serial.println("F");
     }
-
-    //    Serial.println(max_value);
-    //    Serial.println(value);
-    //    Serial.write("\n");
-    value = 0;
+    Serial.println(ref_value);
+    Serial.println(value);
     counter = 0;
+    value = 0;
   }
-
+  if (!is_caliberated) {
+    if (counter > 50000) {
+      ref_value = (value * 13) / 100;
+      is_caliberated = true;
+      counter = 0;
+      value = 0;
+    }
+  }
+  //  Serial.println(counter);
 }
