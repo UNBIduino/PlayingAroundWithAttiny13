@@ -5,7 +5,7 @@
 #define TINY_ADC_PB5 0x00
 #define CHECK_INTERVAL 4000
 #define BOOT_SETTING_CALIB_TIME 15000
-#define COUNTER 5000
+#define COUNTER 100
 
 unsigned long value = 0;
 unsigned long ref_value = 0;
@@ -21,6 +21,7 @@ void setup()
   digitalWrite(PB4, HIGH);
   pinMode(PB1, OUTPUT);
   digitalWrite(PB1, HIGH);
+  delay(5000);
 }
 void loop()
 {
@@ -39,7 +40,7 @@ void loop()
     if (value > ref_value && keystate == false) {
       //        Serial.println("O");
       keystate = true;
-      turnofftime = cur / 1000 + 30; //1000*60*10/
+      turnofftime = cur / 1000 + 600; //1000*60*10/
       //        turnofftime = cur / 1000 + 600; //1000*60*10
     }
     if (value < ref_value) {
@@ -53,8 +54,9 @@ void loop()
     value = 0;
   }
   if (!is_caliberated) {
-    if (counter > 50000) {
-      ref_value = (value * 13) / 100;
+    if (counter > COUNTER*2) {
+      //ref_value = value;  
+      ref_value = 120;
       is_caliberated = true;
       counter = 0;
       value = 0;
