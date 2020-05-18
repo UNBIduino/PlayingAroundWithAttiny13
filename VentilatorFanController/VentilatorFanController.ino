@@ -11,7 +11,7 @@ unsigned long value = 0;
 unsigned long ref_value = 0;
 unsigned long counter = 0;
 boolean is_caliberated = false;
-boolean keystate = false;
+boolean keystate = true;
 unsigned long turnofftime = 0;
 
 void setup()
@@ -31,6 +31,8 @@ void loop()
   } else {
     if (is_caliberated) {
       digitalWrite(PB1, LOW);
+    } else {
+      digitalWrite(PB1, HIGH);
     }
   }
   unsigned int r_data = 1023 - analogRead(TINY_ADC_PB4);
@@ -54,8 +56,8 @@ void loop()
     value = 0;
   }
   if (!is_caliberated) {
-    if (counter > COUNTER*2) {
-      //ref_value = value;  
+    if (counter > COUNTER * 2) {
+      //ref_value = value;
       ref_value = 120;
       is_caliberated = true;
       counter = 0;
